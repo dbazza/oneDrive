@@ -1,7 +1,7 @@
 {
   "name": "One Drive",
   "description": "One Drive extension",
-  "uuid": "diegobazzanella@gmail.com",
+  "uuid": "onedrive@diegobazzanella.com",
   "url": "https://github.com/dbazza/oneDrive",
   "shell-version": [
     "3.38"
