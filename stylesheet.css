@@ -1,0 +1,20 @@
+.disabledIcon {
+    background-image: url("imgs/disabled.png");
+    background-size: 20px;
+    height: 20px;
+    width: 20px;
+}
+
+.activeIcon {
+    background-image: url("imgs/active.png");
+    background-size: 20px;
+    height: 20px;
+    width: 20px;
+}
+
+.workingIcon {
+    background-image: url("imgs/working.png");
+    background-size: 20px;
+    height: 20px;
+    width: 20px;
+}

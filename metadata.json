@@ -1,0 +1,8 @@
+{
+  "name": "One Drive",
+  "description": "One Drive extension",
+  "uuid": "diegobazzanella@gmail.com",
+  "shell-version": [
+    "3.38"
+  ]
+}
