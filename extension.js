@@ -63,7 +63,7 @@ class Indicator extends PanelMenu.Button {
 
         let itemWeb = new PopupMenu.PopupMenuItem(_('Open One Drive web site'));
         itemWeb.connect('activate', () => {
-            GLib.spawn_command_line_sync(
+            GLib.spawn_command_line_async(
                 'xdg-open https://onedrive.live.com/');
         });
         this.menu.addMenuItem(itemWeb);
