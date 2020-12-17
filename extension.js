@@ -32,6 +32,7 @@ const PopupMenu = imports.ui.popupMenu;
 
 const Mainloop = imports.mainloop;
 const GLib = imports.gi.GLib;
+const Gio   = imports.gi.Gio;
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -63,8 +64,10 @@ class Indicator extends PanelMenu.Button {
 
         let itemWeb = new PopupMenu.PopupMenuItem(_('Open One Drive web site'));
         itemWeb.connect('activate', () => {
-            GLib.spawn_command_line_async(
-                'xdg-open https://onedrive.live.com/');
+            // GLib.spawn_command_line_async(
+            //    'xdg-open https://onedrive.live.com/');
+
+            Gio.AppInfo.launch_default_for_uri('https://onedrive.live.com/', null);
         });
         this.menu.addMenuItem(itemWeb);
         
@@ -85,31 +88,30 @@ class Indicator extends PanelMenu.Button {
             }
 
             if(folder === "") Main.notify("One drive 'sync-dir' not found");
-            else GLib.spawn_command_line_sync('xdg-open ' + folder);
+            else GLib.spawn_command_line_async('xdg-open ' + folder);
         });
         this.menu.addMenuItem(itemFolder);
          
-        // controlla che ci siano i requisiti
+        // requirement check
         let problem = false;
         if(!problem && !this.controllaBinario("onedrive")) problem = true;
         if(!problem && !this.controllaBinario("systemctl")) problem = true;
         if(!problem && !this.controllaBinario("xdg-open")) problem = true;
         if(problem) return; 
 
-        // Inizia il loop
+        // start loop
         this.lastLineStatus = "";
-        Mainloop.timeout_add(3000, this.aggiorna.bind(this));
+        this._aggiornaLoop = Mainloop.timeout_add(3000, this.aggiorna.bind(this));
     } 
 
     controllaBinario(bin)
     {
-        let [resOnedrive, outOneDrive] = GLib.spawn_command_line_sync('which ' + bin);
-        if(outOneDrive.toString() === "")
+        if(GLib.find_program_in_path(bin) === null)
         {
             Main.notify("I can't find program '" + bin + "'. This extention will not work!");
             return false;
-        }   
-        
+        }
+
         return true;
     }
 
@@ -181,6 +183,9 @@ class Extension {
     }
 
     disable() {
+
+        Mainloop.source_remove(this._aggiornaLoop);
+
         this._indicator.destroy();
         this._indicator = null;
     }
