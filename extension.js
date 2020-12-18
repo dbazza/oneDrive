@@ -64,9 +64,6 @@ class Indicator extends PanelMenu.Button {
 
         let itemWeb = new PopupMenu.PopupMenuItem(_('Open One Drive web site'));
         itemWeb.connect('activate', () => {
-            // GLib.spawn_command_line_async(
-            //    'xdg-open https://onedrive.live.com/');
-
             Gio.AppInfo.launch_default_for_uri('https://onedrive.live.com/', null);
         });
         this.menu.addMenuItem(itemWeb);
@@ -81,14 +78,15 @@ class Indicator extends PanelMenu.Button {
             {
                 if(config[cont].indexOf("sync_dir") >= 0)
                 {
-                    folder = config[cont].split("=")[1];
+                    folder = (config[cont].split("=")[1]).trim();
                     break;
                 }
                 
             }
 
             if(folder === "") Main.notify("One drive 'sync-dir' not found");
-            else GLib.spawn_command_line_async('xdg-open ' + folder);
+            else Gio.AppInfo.launch_default_for_uri("file://" + folder, null);
+
         });
         this.menu.addMenuItem(itemFolder);
          
@@ -96,7 +94,6 @@ class Indicator extends PanelMenu.Button {
         let problem = false;
         if(!problem && !this.controllaBinario("onedrive")) problem = true;
         if(!problem && !this.controllaBinario("systemctl")) problem = true;
-        if(!problem && !this.controllaBinario("xdg-open")) problem = true;
         if(problem) return; 
 
         // start loop
