@@ -70,23 +70,9 @@ class Indicator extends PanelMenu.Button {
         
         let itemFolder = new PopupMenu.PopupMenuItem(_('Open One Drive local folder'));
         itemFolder.connect('activate', () => {
-            let [resOnedrive, oneDriveConfig] = GLib.spawn_command_line_sync('onedrive --display-config');
-            
-            let folder = "";
-            let config = oneDriveConfig.toString().split("\n");
-            for(let cont=0;cont<config.length;cont++)
-            {
-                if(config[cont].indexOf("sync_dir") >= 0)
-                {
-                    folder = (config[cont].split("=")[1]).trim();
-                    break;
-                }
-                
-            }
-
-            if(folder === "") Main.notify("One drive 'sync-dir' not found");
-            else Gio.AppInfo.launch_default_for_uri("file://" + folder, null);
-
+            this.setOneDriveFolder();
+            if(this._folder === "") Main.notify("One drive 'sync-dir' not found");
+            else Gio.AppInfo.launch_default_for_uri("file://" + this._folder, null);
         });
         this.menu.addMenuItem(itemFolder);
          
@@ -100,6 +86,25 @@ class Indicator extends PanelMenu.Button {
         this.lastLineStatus = "";
         this._aggiornaLoop = Mainloop.timeout_add(3000, this.aggiorna.bind(this));
     } 
+
+    setOneDriveFolder()
+    {
+        let [resOnedrive, oneDriveConfig] = GLib.spawn_command_line_sync('onedrive --display-config');
+            
+        let folder = "";
+        let config = oneDriveConfig.toString().split("\n");
+        for(let cont=0;cont<config.length;cont++)
+        {
+            if(config[cont].indexOf("sync_dir") >= 0)
+            {
+                folder = (config[cont].split("=")[1]).trim();
+                break;
+            }
+            
+        }
+
+        this._folder = folder;
+    }
 
     controllaBinario(bin)
     {
@@ -119,6 +124,8 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("icon_name", "system-search-symbolic");
             this.statusIcon.set_property("icon_name", "");
             
+            this.setEmblem("default");
+            
             let oldlastLineStatus = this.lastLineStatus;
             this.getLastLineStatus();
             if(oldlastLineStatus !== this.lastLineStatus)
@@ -126,6 +133,8 @@ class Indicator extends PanelMenu.Button {
                 this.statusIcon.set_property("style_class", "workingIcon");
                 this.statusIcon.set_property("icon_name", "system-search-symbolic");
                 this.statusIcon.set_property("icon_name", ""); 
+
+                this.setEmblem("default");
             } 
         }
         else
@@ -133,9 +142,27 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("style_class", "disabledIcon");
             this.statusIcon.set_property("icon_name", "system-search-symbolic");
             this.statusIcon.set_property("icon_name", "");
+
+            this.setEmblem("default");
         }
         
         return true;
+    }
+
+    setEmblem(state)
+    {
+        let priority = GLib.PRIORITY_DEFAULT;
+        let cancellable = new Gio.Cancellable();
+        let flags = Gio.FileQueryInfoFlags.NONE;
+
+        let file = Gio.File.new_for_path(folder);
+        file.query_info_async('metadata::emblems', flags, priority, cancellable, (file, res) => {
+            let info = file.query_info_finish(res);
+            info.set_attribute_stringv('metadata::emblems', ["state"]);
+            file.set_attributes_async(info, flags, priority, cancellable, (file, res) => {
+                file.set_attributes_finish(res);
+            });
+        });
     }
 
     isOneDriveActive() {
@@ -182,6 +209,7 @@ class Extension {
     disable() {
 
         Mainloop.source_remove(this._aggiornaLoop);
+        this.setEmblem(null);
 
         this._indicator.destroy();
         this._indicator = null;
