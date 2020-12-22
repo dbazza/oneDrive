@@ -136,7 +136,7 @@ class Indicator extends PanelMenu.Button {
                 this.statusIcon.set_property("icon_name", "system-search-symbolic");
                 this.statusIcon.set_property("icon_name", ""); 
 
-                this.setEmblem("reload");
+                this.setEmblem("synchronizing");
             } 
         }
         else
