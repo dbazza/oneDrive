@@ -54,9 +54,11 @@ class Indicator extends PanelMenu.Button {
         menuItemOnOff.statusAreaKey = "Onedrive";
 
         menuItemOnOff.connect('toggled', this.onOff.bind(this));
+        this.menuItemOnOff = menuItemOnOff;
 
         let itemStatus = new PopupMenu.PopupMenuItem(_('Show service status'));
         itemStatus.connect('activate', () => {
+
             GLib.spawn_command_line_sync(
                 'gnome-terminal --tab --title="Status" --command=\"systemctl --user status onedrive\"');
         });
@@ -126,6 +128,7 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("icon_name", "system-search-symbolic");
             this.statusIcon.set_property("icon_name", "");
             
+            this.menuItemOnOff.setToggleState(true);
             this.setEmblem("default");
             
             let oldlastLineStatus = this.lastLineStatus;
@@ -145,6 +148,7 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("icon_name", "system-search-symbolic");
             this.statusIcon.set_property("icon_name", "");
 
+            this.menuItemOnOff.setToggleState(false);
             this.setEmblem();
         }
         
