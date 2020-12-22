@@ -80,9 +80,11 @@ class Indicator extends PanelMenu.Button {
         let problem = false;
         if(!problem && !this.controllaBinario("onedrive")) problem = true;
         if(!problem && !this.controllaBinario("systemctl")) problem = true;
+        if(!problem && !this.controllaBinario("touch")) problem = true;
         if(problem) return; 
 
         // start loop
+        this.setOneDriveFolder();
         this.lastLineStatus = "";
         this._aggiornaLoop = Mainloop.timeout_add(3000, this.aggiorna.bind(this));
     } 
@@ -134,7 +136,7 @@ class Indicator extends PanelMenu.Button {
                 this.statusIcon.set_property("icon_name", "system-search-symbolic");
                 this.statusIcon.set_property("icon_name", ""); 
 
-                this.setEmblem("default");
+                this.setEmblem("reload");
             } 
         }
         else
@@ -143,7 +145,7 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("icon_name", "system-search-symbolic");
             this.statusIcon.set_property("icon_name", "");
 
-            this.setEmblem("default");
+            this.setEmblem();
         }
         
         return true;
@@ -155,15 +157,19 @@ class Indicator extends PanelMenu.Button {
         let cancellable = new Gio.Cancellable();
         let flags = Gio.FileQueryInfoFlags.NONE;
 
-        let file = Gio.File.new_for_path(folder);
+        let file = Gio.File.new_for_path(this._folder);
         file.query_info_async('metadata::emblems', flags, priority, cancellable, (file, res) => {
             let info = file.query_info_finish(res);
-            info.set_attribute_stringv('metadata::emblems', ["state"]);
+
+            if(state === undefined) info.set_attribute_stringv('metadata::emblems', []);
+            else info.set_attribute_stringv('metadata::emblems', [state]);
+
             file.set_attributes_async(info, flags, priority, cancellable, (file, res) => {
                 file.set_attributes_finish(res);
+                GLib.spawn_command_line_async("touch " + this._folder);
             });
         });
-    }
+    } 
 
     isOneDriveActive() {
         let [resOnedrive, outOnedrive] = GLib.spawn_command_line_sync("systemctl --user is-active onedrive");
@@ -209,7 +215,7 @@ class Extension {
     disable() {
 
         Mainloop.source_remove(this._aggiornaLoop);
-        this.setEmblem(null);
+        this.setEmblem();
 
         this._indicator.destroy();
         this._indicator = null;
