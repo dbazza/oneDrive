@@ -21,52 +21,12 @@ const WebBrowser = new Lang.Class({
             application_id: 'OneDrive.login.WebBrowser'
         });
 
-        this.inFile = "/home/diego/in";
-        this.outFile = "/home/diego/out";
+        this.inFile = GLib.get_tmp_dir() + "/in";
+        this.outFile = GLib.get_tmp_dir() + "/out";
 
         // Connect 'activate' and 'startup' signals to the callback functions
         this.connect('activate', () => this._onActivate())
         this.connect('startup', () => this._onStartup())
-    },
-
-    startLogin()
-    {
-        print('Parte startLogin');
-        let url = "";
-        try 
-        {
-            url = String(GLib.file_get_contents(this.inFile)[1]);
-            this._homeUrl = url;
-            this._webView.load_uri(this._homeUrl);
-
-            this._attendiOut = Mainloop.timeout_add(500, this.endLogin.bind(this));
-
-            return false;
-        } 
-        catch(ex)
-        {
-            print('Erroraccio ' + ex.message);
-        }
-
-        return true;
-    },
-
-    endLogin()
-    {
-        print('Parte endLogin');
-
-        let url = "";
-        try 
-        {
-            GLib.file_set_contents(this.outFile, "Prova");
-            Mainloop.timeout_add(1000, function() { this.quit(); }.bind(this));
-        } 
-        catch(ex)
-        {
-            print('Erroraccio ' + ex.message);
-        }
-
-        return true;
     },
 
     // Callback function for 'activate' signal 
@@ -75,7 +35,9 @@ const WebBrowser = new Lang.Class({
         this._window.present();
 
         GLib.spawn_command_line_async("onedrive --auth-files " + this.inFile + ":" + this.outFile + " --logout");
-        this._attendiIn = Mainloop.timeout_add(5000, this.startLogin.bind(this));
+
+        this.numeroTentativi = 0;
+        this._attendiIn = Mainloop.timeout_add(500, this.startLogin.bind(this));
     },
 
     // Callback function for 'startup' signal
@@ -139,8 +101,53 @@ const WebBrowser = new Lang.Class({
             if (loadEvent !== WebKit.LoadEvent.COMMITTED) {
                 return
             }
-            //this._urlBar.text = this._webView.get_uri();
         });
+    },
+
+    startLogin()
+    {
+        if(this.numeroTentativi > 10)
+        {
+            print("Error in open file with uri");
+            this.quit();
+            return false;
+        }
+
+        let url = "";
+        try 
+        {
+            url = String(GLib.file_get_contents(this.inFile)[1]);
+            this._homeUrl = url;
+            this._webView.load_uri(this._homeUrl);
+
+            this._attendiOut = Mainloop.timeout_add(500, this.endLogin.bind(this));
+
+            return false;
+        } 
+        catch(ex)
+        {
+            this.numeroTentativi++;
+        }
+
+        return true;
+    },
+
+    endLogin()
+    {
+        if(this._webView.get_uri().indexOf("code=") === -1) return true;
+
+        let url = "";
+        try 
+        {
+            GLib.file_set_contents(this.outFile, this._webView.get_uri());
+            Mainloop.timeout_add(1000, function() { this.quit(); }.bind(this));
+        } 
+        catch(ex)
+        {
+            print(ex.message);
+        }
+
+        return false;
     }
 });
 

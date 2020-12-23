@@ -56,6 +56,23 @@ class Indicator extends PanelMenu.Button {
         menuItemOnOff.connect('toggled', this.onOff.bind(this));
         this.menuItemOnOff = menuItemOnOff;
 
+        let itemLogin = new PopupMenu.PopupMenuItem(_('Login...'));
+        itemLogin.connect('activate', () => {
+                
+            if(this.menuItemOnOff._switch.state)
+            {
+                this.menuItemOnOff.setToggleState(false);
+                this.onOff().bind(this);
+            }
+            else
+            {
+                GLib.spawn_command_line_async('gjs ' + ExtensionUtils.getCurrentExtension().dir.get_path() + '/login.js');
+            }
+                
+        });
+        this.menu.addMenuItem(itemLogin);
+        this.itemLogin = itemLogin;
+
         let itemStatus = new PopupMenu.PopupMenuItem(_('Show service status'));
         itemStatus.connect('activate', () => {
 
@@ -129,6 +146,7 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("icon_name", "");
             
             this.menuItemOnOff.setToggleState(true);
+            this.itemLogin.label.text = _('Logout...');
             this.setEmblem("default");
             
             let oldlastLineStatus = this.lastLineStatus;
@@ -149,6 +167,7 @@ class Indicator extends PanelMenu.Button {
             this.statusIcon.set_property("icon_name", "");
 
             this.menuItemOnOff.setToggleState(false);
+            this.itemLogin.label.text = _('Login...');
             this.setEmblem();
         }
         
@@ -218,8 +237,8 @@ class Extension {
 
     disable() {
 
-        Mainloop.source_remove(this._aggiornaLoop);
-        this.setEmblem();
+        Mainloop.source_remove(this._indicator._aggiornaLoop);
+        this._indicator.setEmblem();
 
         this._indicator.destroy();
         this._indicator = null;
