@@ -151,7 +151,9 @@ class Indicator extends PanelMenu.Button {
             
             let oldlastLineStatus = this.lastLineStatus;
             this.getLastLineStatus();
-            if(oldlastLineStatus !== this.lastLineStatus)
+            if(oldlastLineStatus !== this.lastLineStatus 
+                || this.lastLineStatus.indexOf("Downloading") >= 0
+                || this.lastLineStatus.indexOf("Uploading") >= 0)
             {
                 this.statusIcon.set_property("style_class", "workingIcon");
                 this.statusIcon.set_property("icon_name", "system-search-symbolic");
