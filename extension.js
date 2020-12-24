@@ -141,14 +141,6 @@ class Indicator extends PanelMenu.Button {
     aggiorna() {
         if(this.isOneDriveActive())
         {
-            this.statusIcon.set_property("style_class", "activeIcon");
-            this.statusIcon.set_property("icon_name", "system-search-symbolic");
-            this.statusIcon.set_property("icon_name", "");
-            
-            this.menuItemOnOff.setToggleState(true);
-            this.itemLogin.label.text = _('Logout...');
-            this.setEmblem("default");
-            
             let oldlastLineStatus = this.lastLineStatus;
             this.getLastLineStatus();
             if(oldlastLineStatus !== this.lastLineStatus 
@@ -161,6 +153,16 @@ class Indicator extends PanelMenu.Button {
 
                 this.setEmblem("synchronizing");
             } 
+            else
+            {
+                this.statusIcon.set_property("style_class", "activeIcon");
+                this.statusIcon.set_property("icon_name", "system-search-symbolic");
+                this.statusIcon.set_property("icon_name", "");
+                
+                this.menuItemOnOff.setToggleState(true);
+                this.itemLogin.label.text = _('Logout...');
+                this.setEmblem("default");
+            }
         }
         else
         {
