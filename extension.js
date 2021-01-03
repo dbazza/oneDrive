@@ -141,11 +141,11 @@ class Indicator extends PanelMenu.Button {
     aggiorna() {
         if(this.isOneDriveActive())
         {
-            let oldlastLineStatus = this.lastLineStatus;
             this.getLastLineStatus();
-            if(oldlastLineStatus !== this.lastLineStatus 
-                || (this.lastLineStatus.indexOf("Downloading") >= 0 && this.lastLineStatus.indexOf("done.") === -1)
-                || (this.lastLineStatus.indexOf("Uploading") >= 0 && this.lastLineStatus.indexOf("done.") === -1))
+            if(this.lastLineStatus.indexOf("Starting a sync with OneDrive") >= 0 
+            || this.lastLineStatus.indexOf("Syncing changes from OneDrive") >= 0
+            || this.lastLineStatus.indexOf("Downloading file") >= 0
+            || this.lastLineStatus.indexOf("Uploading new file") >= 0)
             {
                 this.statusIcon.set_property("style_class", "workingIcon");
                 this.statusIcon.set_property("icon_name", "system-search-symbolic");
