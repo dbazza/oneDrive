@@ -17,7 +17,7 @@ One Drive Gnome Shell Extension can:
 
 # Install
 
-Install the client. Detailed instructions here: https://github.com/abraunegg/onedrive/blob/master/docs/INSTALL.md (on recent Ubuntu simpli write in a terminal "sudo apt-get install onedrive").
+Install the client. Detailed instructions here: https://github.com/abraunegg/onedrive/blob/master/docs/INSTALL.md. If you have ubuntu installed take a look to <a href="https://github.com/abraunegg/onedrive/blob/master/docs/INSTALL.md#important-information-for-all-ubuntu-and-ubuntu-based-distribution-users">this advise</a>
 
 Go to gnome shell extensione page (https://extensions.gnome.org/extension/3919/one-drive/) and install it. You have to make login and activate the service via extension. That's all!
 
